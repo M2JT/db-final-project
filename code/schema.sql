@@ -12,19 +12,20 @@ drop table if exists Referees cascade;
 drop table if exists Games_monitored_by_referees cascade;
 
 create table Teams (
-	tid serial primary key,
+	tid integer primary key,
 	name varchar(128) unique not null,
 	homeCity varchar(128) not null
 );
 
 -- Players Teams exactly one TO one or more
 create table Players_belong_to_teams (
-	pid serial primary key,
+	pid integer primary key,
 	name varchar(128) not null,
-	dob date not null,
-	jerseyNum integer not null,
+	age integer not null,
+	position varchar(128) not null,
 	tid integer not null,
-	constraint unique_name_dob_jNum unique (name, dob, jerseyNum),
+	efg decimal,
+	constraint unique_name_age_pos unique (name, age, position),
 	foreign key (tid) references Teams(tid)
 );
 
@@ -49,15 +50,15 @@ create table Sponsors (
 
 -- Teams Coaches exactly one TO exactly one
 create table Coaches_train_teams (
-	cid serial primary key,
+	cid integer primary key,
 	tid integer unique not null,
-	coach_name varchar(128) not null,
-	dob date not null,
-	constraint unique_cName_tid unique (coach_name, tid)
+	coachName varchar(128) not null,
+	startDate date not null,
+	constraint unique_cName_tid unique (coachName, tid)
 );
 
 create table Arenas (
-	aid serial primary key,
+	aid integer primary key,
 	name varchar(128) unique not null,
 	location varchar(256) not null
 );
@@ -96,9 +97,9 @@ create table Games_hosted_in_arenas (
 );
 
 create table Referees (
-	rid serial primary key,
+	rid integer primary key,
 	name varchar(128) not null,
-	dob date not null
+	yoe integer not null
 );
 
 -- Games Referees exactly one TO any
