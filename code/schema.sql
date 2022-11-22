@@ -1,15 +1,15 @@
-drop table if exists Teams cascade;
-drop table if exists Players_belong_to_teams cascade;
-drop table if exists PlayerNews cascade;
-drop table if exists Sponsors cascade;
-drop table if exists Coaches_train_teams cascade;
-drop table if exists Arenas cascade;
-drop table if exists Teams_homed_to_arenas cascade;
-drop table if exists GameDates cascade;
-drop table if exists Game cascade;
-drop table if exists Games_hosted_in_arenas cascade;
-drop table if exists Referees cascade;
-drop table if exists Games_monitored_by_referees cascade;
+drop table if exists Teams cascade; -- done
+drop table if exists Players_belong_to_teams cascade; -- done
+drop table if exists PlayerNews cascade; -- done
+drop table if exists Sponsors cascade; -- done
+drop table if exists Coaches_train_teams cascade; -- done
+drop table if exists Arenas cascade; -- done
+drop table if exists Teams_homed_to_arenas cascade; -- done
+drop table if exists GameDates cascade; -- done
+drop table if exists Game cascade; -- done
+drop table if exists Games_hosted_in_arenas cascade; -- done
+drop table if exists Referees cascade; -- done
+drop table if exists Games_monitored_by_referees cascade; -- done
 
 create table Teams (
 	tid integer primary key,
@@ -90,7 +90,7 @@ create table Games_hosted_in_arenas (
 	winnerTeamId integer,
 	loserTeamId integer,
 	gameDate date,
-	aid integer unique not null,
+	aid integer not null,
 	primary key (winnerTeamId, loserTeamId, gameDate),
 	foreign key (winnerTeamId, loserTeamId, gameDate) references Game(winnerTeamId, loserTeamId, gameDate),
 	foreign key (aid) references Arenas(aid)
