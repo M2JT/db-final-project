@@ -1,15 +1,15 @@
-drop table if exists Teams cascade; -- done
-drop table if exists Players_belong_to_teams cascade; -- done
-drop table if exists PlayerNews cascade; -- done
-drop table if exists Sponsors cascade; -- done
-drop table if exists Coaches_train_teams cascade; -- done
-drop table if exists Arenas cascade; -- done
-drop table if exists Teams_homed_to_arenas cascade; -- done
-drop table if exists GameDates cascade; -- done
-drop table if exists Game cascade; -- done
-drop table if exists Games_hosted_in_arenas cascade; -- done
-drop table if exists Referees cascade; -- done
-drop table if exists Games_monitored_by_referees cascade; -- done
+drop table if exists Teams cascade; -- Q1
+drop table if exists Players_belong_to_teams cascade; -- Q1
+drop table if exists PlayerNews cascade; -- Q4
+drop table if exists Sponsors cascade;
+drop table if exists Coaches_train_teams cascade;
+drop table if exists Arenas cascade; -- Q2
+drop table if exists Teams_homed_to_arenas cascade;
+drop table if exists GameDates cascade; -- Q3
+drop table if exists Game cascade; -- Q2
+drop table if exists Games_hosted_in_arenas cascade; -- Q2
+drop table if exists Referees cascade;  -- Q2
+drop table if exists Games_monitored_by_referees cascade; -- Q2
 
 create table Teams (
 	tid integer primary key,
