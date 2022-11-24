@@ -44,6 +44,45 @@ commonPositions = {
 	'SF': 'small forward'
 }
 
+rNameToId = {
+    'James Capers': 1,
+    'Tony Brothers': 2,
+    'JB DeRosa': 3,
+    'Marc Davis': 4,
+    'Courtney Kirkland': 5,
+    'Rodney Mott': 6,
+    'Zach Zarba': 7,
+    'Leon Wood': 8,
+    'Pat Fraher': 9,
+    'Scott Foster': 10,
+    'Sean Wright': 11,
+    'Curtis Blair': 12,
+    'Eric Lewis': 13,
+    'Sean Corbin': 14,
+    'Josh Tiven': 15,
+    'Michael Smith': 16,
+    'Derek Richardson': 17,
+    'John Goble': 18,
+    'Bill Kennedy': 19,
+    'Scott Wall': 20,
+    'James Williams': 21,
+    'Kevin Scott': 22,
+    'Ed Malloy': 23,
+    'Matt Boland': 24,
+    'Ben Taylor': 25,
+    'Tyler Ford': 26,
+    'Eric Dalen': 27,
+    'David Guthrie': 28,
+    'J.T. Orr': 29,
+    'Kevin Cutler': 30,
+    'Brian Forte': 31,
+    'Tre Maddox': 32,
+    'Nick Buchert': 33,
+    'Karl Lane': 34,
+    'Justin Van Duyne': 35,
+    'Mitchell Ervin': 36
+}
+
 "# A Simple Simulation of an NBA (National Basketball Association) Database Application"
 
 @st.cache
@@ -139,3 +178,40 @@ else:
 		st.write(
             'Sorry! Something went wrong with your query, please try again.'
         )
+
+'## Find all the games that your selected referee had officiated between 10/18/22 and 10/23/22'
+
+sqlAllReferees = 'SELECT name FROM referees;'
+try:
+	allReferees = query_db(sqlAllReferees)['name'].tolist()
+	selectedReferee = st.selectbox("Choose a referee", allReferees)
+except:
+	st.write('Sorry! Something went wrong with your query, please try again.')
+
+if selectedReferee:
+	sqlReferee = f'''
+		select r.name referee_name, t1.name winner_team, t2.name loser_team, g.gamedate game_date
+		from Games_monitored_by_referees g, Referees r, Teams t1, Teams t2
+		where r.rid = {rNameToId[selectedReferee]} and
+		g.rid = r.rid and
+		g.winnerTeamId = t1.tid and
+		g.loserTeamId = t2.tid
+		order by game_date;
+	'''
+
+	try:
+		df = query_db(sqlReferee)
+
+		if df.empty:
+			f'''
+			Unfortunately, but {selectedReferee} did not officiate any games during these dates. 
+			Please select another referee to examine!
+			'''
+		else:
+			f'Resulting tables'
+
+			st.dataframe(df)
+	except:
+		st.write(
+	    	'Sorry! Something went wrong with your query, please try again.'
+		)
