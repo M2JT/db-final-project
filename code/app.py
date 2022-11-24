@@ -154,7 +154,8 @@ else:
 	sqlQuery = f'''
 	select p.name player_name, p.age player_age, p.position player_position, p.efg player_efg, t.name player_team
 	from players_belong_to_teams p, teams t
-	where p.tid = t.tid and
+	where p.tid = {userInputId} and
+	p.tid = t.tid and
 	p.efg = (select MAX(efg) from Players_belong_to_teams where tid = {userInputId})
 	limit 1;
 	'''
@@ -190,17 +191,24 @@ except:
 
 if selectedReferee:
 	sqlReferee = f'''
-		select r.name referee_name, t1.name winner_team, t2.name loser_team, g.gamedate game_date
-		from Games_monitored_by_referees g, Referees r, Teams t1, Teams t2
+		select t1.name winner_team, t2.name loser_team, a.name arena_name, g1.gamedate game_date
+		from Games_monitored_by_referees g1, Games_hosted_in_arenas g2, Referees r, teams t1, teams t2, arenas a
 		where r.rid = {rNameToId[selectedReferee]} and
-		g.rid = r.rid and
-		g.winnerTeamId = t1.tid and
-		g.loserTeamId = t2.tid
+		g1.rid = r.rid and
+		g1.winnerTeamId = t1.tid and
+		g1.loserTeamId = t2.tid and
+		g1.winnerTeamId = g2.winnerTeamId and
+		g1.loserTeamId = g2.loserTeamId and
+		g1.gamedate = g2.gamedate and
+		g2.aid = a.aid
 		order by game_date;
 	'''
 
+	sqlRefereeInfo = f'select name, yoe from referees where rid = {rNameToId[selectedReferee]};'
+
 	try:
 		df = query_db(sqlReferee)
+		df2 = query_db(sqlRefereeInfo).loc[0]
 
 		if df.empty:
 			f'''
@@ -208,10 +216,48 @@ if selectedReferee:
 			Please select another referee to examine!
 			'''
 		else:
-			f'Resulting tables'
+			refereeName, yoe = df2['name'], df2['yoe']
+
+			f'''{refereeName}, who currently has {yoe} years 
+			of officiating experience in basketball games, had officiated the following NBA games
+			during these dates
+			'''
 
 			st.dataframe(df)
 	except:
 		st.write(
 	    	'Sorry! Something went wrong with your query, please try again.'
 		)
+
+'## Find the head coaches that won or lost the most games between 10/18/22 and 10/23/22'
+
+options = ['Win', 'Lose']
+option = st.radio('Pick your option', options)
+
+if option == 'Win':
+	sqlQuery3 = f'''
+		select c.coachname coach_name, t.name team_name, res.num_wins
+		from teams t, Coaches_train_teams c, (select winnerTeamId, count(winnerTeamId) num_wins from game group by winnerTeamId) res
+		where t.tid = res.winnerTeamId and
+		t.tid = c.tid and
+		res.num_wins = (select MAX(res2.num_wins) num_wins from (select count(winnerTeamId) num_wins from game group by winnerTeamId) res2)
+		order by coach_name, team_name;
+	'''
+else:
+	sqlQuery3 = f'''
+		select c.coachname coach_name, t.name team_name, res.num_loses
+		from teams t, Coaches_train_teams c, (select loserTeamId, count(loserTeamId) num_loses from game group by loserTeamId) res
+		where t.tid = res.loserTeamId and
+		t.tid = c.tid and
+		res.num_loses = (select MAX(res2.num_loses) num_loses from (select count(loserTeamId) num_loses from game group by loserTeamId) res2)
+		order by coach_name, team_name;
+	'''
+try:
+	f'Resulting tables'
+
+	df = query_db(sqlQuery3)
+	st.dataframe(df)
+except:
+	st.write(
+        'Sorry! Something went wrong with your query, please try again.'
+    )
