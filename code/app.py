@@ -277,7 +277,7 @@ except:
 	
 '## Find all the games that your selected referee had officiated between 10/18/22 and 10/23/22'
 
-sqlAllDates = 'SELECT date from GameDates;'
+sqlAllDates = 'SELECT gameDate as date from GameDates;'
 try:
 	alldates = query_db(sqlAllDates)['date'].tolist()
 	selectedDate = st.selectbox("Choose a date", alldates)
@@ -286,14 +286,13 @@ except:
 
 if selectedDate:
 	sqlDates = f'''
-		Select ga.gameDate, t1.name as Winner_team, t2.name as loser_team, a.name as arena 
-        from games_hosted_in_arenas ga,  gameDates gd,  teams t1, teams t2, Arenas a 
-        where
-        ga.gameDate = {selectedDate}
-        ga.gameDate = gd.gameDate 
-        And t1.tid = ga.winnerteamid
-        And t2.tid = ga.loserteamid;
-
+		select ga.gameDate, t1.name as Winner_team, t2.name as Loser_team, a.name as arena                          
+		from games_hosted_in_arenas ga, gameDates gd, teams t1, teams t2, Arenas a                                              
+		where ga.gameDate = gd.gameDate                                                                                         
+		and t1.tid = ga.winnerteamid                                                                                            
+		and t2.tid = ga.loserteamid 
+		and a.aid = ga.aid 
+		and ga.gameDate = {selectedDate}; 
 	'''
 
 try:
