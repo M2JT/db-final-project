@@ -3,6 +3,17 @@ import psycopg2
 import streamlit as st
 from configparser import ConfigParser
 
+
+gameDates = [
+    '10-18-2022',
+    '10-19-2022',
+    '10-20-2022',
+    '10-21-2022',
+    '10-22-2022',
+    '10-23-2022'
+]
+
+
 teamNameToId = {
     'Atlanta Hawks': 1,
     'Boston Celtics': 2,
@@ -259,5 +270,82 @@ try:
 	st.dataframe(df)
 except:
 	st.write(
+        'Sorry! Something went wrong with your query, please try again.'
+    )
+	
+	
+	
+'## Find all the games that your selected referee had officiated between 10/18/22 and 10/23/22'
+
+sqlAllDates = 'SELECT date from GameDates;'
+try:
+	alldates = query_db(sqlAllDates)['date'].tolist()
+	selectedDate = st.selectbox("Choose a date", alldates)
+except:
+	st.write('Sorry! Something went wrong with your query, please try again.')
+
+if selectedDate:
+	sqlDates = f'''
+		Select ga.gameDate, t1.name as Winner_team, t2.name as loser_team, a.name as arena 
+        from games_hosted_in_arenas ga,  gameDates gd,  teams t1, teams t2, Arenas a 
+        where
+        ga.gameDate = {selectedDate}
+        ga.gameDate = gd.gameDate 
+        And t1.tid = ga.winnerteamid
+        And t2.tid = ga.loserteamid;
+
+	'''
+
+try:
+    df = query_db(sqlDates).loc[0]
+
+    gameDate, Winner_team, loser_team, arena = (
+        queryInfo['gameDate'],
+        queryInfo['Winner_team'],
+        queryInfo['player_position'],
+        queryInfo['arena'],
+    )
+except:
+    st.write(
+        'Sorry! Something went wrong with your query, please try again.'
+    )
+
+
+
+
+
+'## Find all the news associated with one team (All the playernews on one team'
+
+userInput = st.text_input('Please type in one team name (case sensitive)', 'Atlanta Hawks')
+if userInput not in teamNameToId:
+	st.write("Sorry! The team you've entered doesn't match with what we have on record, please try again.")
+else:
+	userInputId = teamNameToId[userInput]
+	sqlQuery4 = f'''
+        select 
+            p.name as player_name, t.name as team,pn.title as news, pn.link  
+        from 
+            players_belong_to_teams p, playernews pn, teams t 
+        where
+            pn.pid  = p.pid and p.tid = t.tid and p.tid = {userInput};
+    '''
+try:
+    queryInfo = query_db(sqlQuery4).loc[0]
+    if queryInfo.empty:
+        f'''
+        Unfortunately, but {userInput} did not have any playernews. 
+        Please select another team to examine!
+    
+    else    '''
+        player_name, team, news, link = (
+            queryInfo['player_name'],
+            queryInfo['team'],
+            queryInfo['news'],
+            queryInfo['link'],
+
+        )
+    
+except:
+    st.write(
         'Sorry! Something went wrong with your query, please try again.'
     )
