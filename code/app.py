@@ -284,13 +284,13 @@ except:
 
 if selectedDate:
 	sqlDates = f'''
-		select ga.gameDate, t1.name as Winner_team, t2.name as Loser_team, a.name as arena                          
+		select ga.gameDate game_date, t1.name as Winner_team, t2.name as Loser_team, a.name as arena                          
 		from games_hosted_in_arenas ga, gameDates gd, teams t1, teams t2, Arenas a                                              
 		where ga.gameDate = gd.gameDate                                                                                         
 		and t1.tid = ga.winnerteamid                                                                                            
 		and t2.tid = ga.loserteamid 
 		and a.aid = ga.aid 
-		and ga.gameDate = {selectedDate}
+		and ga.gameDate = '{selectedDate}'
         order by winner_team, loser_team; 
 	'''
 try:
@@ -325,8 +325,8 @@ try:
         f'''
         Unfortunately, but {userInput} did not have any playernews. 
         Please select another team to examine!
-    
-    else    '''
+        '''
+    else:
         player_name, team, news, link = (
             queryInfo['player_name'],
             queryInfo['team'],
@@ -334,7 +334,6 @@ try:
             queryInfo['link'],
 
         )
-    
 except:
     st.write(
         'Sorry! Something went wrong with your query, please try again.'
