@@ -3,7 +3,6 @@ import psycopg2
 import streamlit as st
 from configparser import ConfigParser
 
-
 gameDates = [
     '10-18-2022',
     '10-19-2022',
@@ -12,7 +11,6 @@ gameDates = [
     '10-22-2022',
     '10-23-2022'
 ]
-
 
 teamNameToId = {
     'Atlanta Hawks': 1,
@@ -134,7 +132,7 @@ def query_db(sql: str):
     return df
 
 
-"## Read tables"
+"## Examine tables"
 
 sql_all_table_names = "SELECT relname FROM pg_class WHERE relkind='r' AND relname !~ '^(pg_|sql_)';"
 try:
@@ -144,7 +142,7 @@ except:
     st.write("Sorry! Something went wrong with your query, please try again.")
 
 if table_name:
-    f"Display the table"
+    f"Table data"
 
     sql_table = f"SELECT * FROM {table_name};"
     try:
@@ -275,7 +273,7 @@ except:
 	
 	
 	
-'## Find all the games that your selected referee had officiated between 10/18/22 and 10/23/22'
+'## Find all the games that was played on a selected date between 10/18/22 and 10/23/22'
 
 sqlAllDates = 'SELECT gameDate as date from GameDates;'
 try:
@@ -292,28 +290,21 @@ if selectedDate:
 		and t1.tid = ga.winnerteamid                                                                                            
 		and t2.tid = ga.loserteamid 
 		and a.aid = ga.aid 
-		and ga.gameDate = {selectedDate}; 
+		and ga.gameDate = {selectedDate}
+        order by winner_team, loser_team; 
 	'''
-
 try:
-    df = query_db(sqlDates).loc[0]
+    f'Resulting tables'
 
-    gameDate, Winner_team, loser_team, arena = (
-        queryInfo['gameDate'],
-        queryInfo['Winner_team'],
-        queryInfo['player_position'],
-        queryInfo['arena'],
-    )
+    df = query_db(sqlDates)
+    st.dataframe(df)
 except:
     st.write(
         'Sorry! Something went wrong with your query, please try again.'
     )
 
 
-
-
-
-'## Find all the news associated with one team (All the playernews on one team'
+'## Find all the player news associated with one team'
 
 userInput = st.text_input('Please type in one team name (case sensitive)', 'Atlanta Hawks')
 if userInput not in teamNameToId:
