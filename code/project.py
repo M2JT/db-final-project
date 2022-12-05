@@ -3,15 +3,6 @@ import psycopg2
 import streamlit as st
 from configparser import ConfigParser
 
-gameDates = [
-    '10-18-2022',
-    '10-19-2022',
-    '10-20-2022',
-    '10-21-2022',
-    '10-22-2022',
-    '10-23-2022'
-]
-
 teamNameToId = {
     'Atlanta Hawks': 1,
     'Boston Celtics': 2,
@@ -94,6 +85,7 @@ rNameToId = {
 
 "# A Simple Simulation of an NBA (National Basketball Association) Database Application"
 
+# functions provided in project_demo
 @st.cache
 def get_config(filename="database.ini", section="postgresql"):
     parser = ConfigParser()
@@ -131,7 +123,7 @@ def query_db(sql: str):
 
     return df
 
-
+# code provided in project_demo
 "## Examine tables"
 
 sql_all_table_names = "SELECT relname FROM pg_class WHERE relkind='r' AND relname !~ '^(pg_|sql_)';"
@@ -270,8 +262,7 @@ except:
 	st.write(
         'Sorry! Something went wrong with your query, please try again.'
     )
-	
-	
+
 	
 '## Find all the games that was played on a selected date between 10/18/22 and 10/23/22'
 
@@ -306,34 +297,27 @@ except:
 
 '## Find all the player news associated with one team'
 
-userInput = st.text_input('Please type in one team name (case sensitive)', 'Atlanta Hawks')
+userInput = st.text_input('Please type one team name (case sensitive)', 'Golden State Warriors')
 if userInput not in teamNameToId:
 	st.write("Sorry! The team you've entered doesn't match with what we have on record, please try again.")
 else:
 	userInputId = teamNameToId[userInput]
 	sqlQuery4 = f'''
-        select 
-            p.name as player_name, t.name as team,pn.title as news, pn.link  
-        from 
-            players_belong_to_teams p, playernews pn, teams t 
-        where
-            pn.pid  = p.pid and p.tid = t.tid and p.tid = {userInput};
+        select p.name as player_name, t.name as team,pn.title as news, pn.link  
+        from players_belong_to_teams p, playernews pn, teams t 
+        where pn.pid = p.pid and p.tid = t.tid and p.tid = {userInput};
     '''
 try:
-    queryInfo = query_db(sqlQuery4).loc[0]
+    queryInfo = query_db(sqlQuery4)
     if queryInfo.empty:
         f'''
-        Unfortunately, but {userInput} did not have any playernews. 
+        Unfortunately, but {userInput} team did not have any player news. 
         Please select another team to examine!
         '''
     else:
-        player_name, team, news, link = (
-            queryInfo['player_name'],
-            queryInfo['team'],
-            queryInfo['news'],
-            queryInfo['link'],
+    	f'Resulting tables'
 
-        )
+    	st.dataframe(queryInfo)
 except:
     st.write(
         'Sorry! Something went wrong with your query, please try again.'
