@@ -145,6 +145,7 @@ if table_name:
             "Sorry! Something went wrong with your query, please try again."
         )
 
+# our own implementation starting here
 '## Find the most efficient player (having the highest eFG%) on your chosen team'
 
 userInput = st.text_input('Please type in one team name (case sensitive)', 'Atlanta Hawks')
@@ -299,26 +300,26 @@ except:
 
 userInput = st.text_input('Please type one team name (case sensitive)', 'Golden State Warriors')
 if userInput not in teamNameToId:
-	st.write("Sorry! The team you've entered doesn't match with what we have on record, please try again.")
+    st.write("Sorry! The team you've entered doesn't match with what we have on record, please try again.")
 else:
-	userInputId = teamNameToId[userInput]
-	sqlQuery4 = f'''
-        select p.name as player_name, t.name as team,pn.title as news, pn.link  
+    userInputId = teamNameToId[userInput]
+    sqlQuery4 = f'''
+        select p.name as player_name, t.name as team,pn.title as news_title, pn.link  
         from players_belong_to_teams p, playernews pn, teams t 
-        where pn.pid = p.pid and p.tid = t.tid and p.tid = {userInput};
+        where pn.pid = p.pid and p.tid = t.tid and p.tid = {userInputId};
     '''
-try:
-    queryInfo = query_db(sqlQuery4)
-    if queryInfo.empty:
-        f'''
-        Unfortunately, but {userInput} team did not have any player news. 
-        Please select another team to examine!
-        '''
-    else:
-    	f'Resulting tables'
+    try:
+        queryInfo = query_db(sqlQuery4)
+        if queryInfo.empty:
+            f'''
+            Unfortunately, but {userInput} team did not have any player news. 
+            Please select another team to examine!
+            '''
+        else:
+            f'Resulting tables'
 
-    	st.dataframe(queryInfo)
-except:
-    st.write(
-        'Sorry! Something went wrong with your query, please try again.'
-    )
+            st.dataframe(queryInfo)
+    except:
+        st.write(
+            'Sorry! Something went wrong with your query, please try again.'
+        )
