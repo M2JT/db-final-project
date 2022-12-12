@@ -134,7 +134,7 @@ except:
     st.write("Sorry! Something went wrong with your query, please try again.")
 
 if table_name:
-    f"Table data"
+    f"Table data:"
 
     sql_table = f"SELECT * FROM {table_name};"
     try:
@@ -154,7 +154,7 @@ if userInput not in teamNameToId:
 else:
 	userInputId = teamNameToId[userInput]
 	sqlQuery = f'''
-	select p.name player_name, p.age player_age, p.position player_position, p.efg player_efg, t.name player_team
+	select p.name player_name, p.age player_age, p.position player_position, p.efg player_efg, t.name player_team, t.homecity home_city
 	from players_belong_to_teams p, teams t
 	where p.tid = {userInputId} and
 	p.tid = t.tid and
@@ -163,17 +163,18 @@ else:
 	'''
 	try:
 		queryInfo = query_db(sqlQuery).loc[0]
-		player_name, player_age, player_position, player_efg, player_team = (
+		player_name, player_age, player_position, player_efg, player_team, home_city = (
 			queryInfo['player_name'],
 			queryInfo['player_age'],
 			queryInfo['player_position'],
 			queryInfo['player_efg'],
-			queryInfo['player_team']
+			queryInfo['player_team'],
+			queryInfo['home_city']
 		)
 		st.write(
 			f'''
 			Having a {round(player_efg * 100, 2)}% effective field goal (eFG%),
-			{player_name} is the most efficient player on the {player_team} team.
+			{player_name} is the most efficient player on the {player_team} team based in {home_city}.
 			He is currently {player_age} years old, playing position {commonPositions[player_position]}.
 			'''
 		)
@@ -193,7 +194,7 @@ except:
 
 if selectedReferee:
 	sqlReferee = f'''
-		select t1.name winner_team, t2.name loser_team, a.name arena_name, g1.gamedate game_date
+		select t1.name winner_team, t2.name loser_team, a.name arena_name, a.location, g1.gamedate game_date
 		from Games_monitored_by_referees g1, Games_hosted_in_arenas g2, Referees r, teams t1, teams t2, arenas a
 		where r.rid = {rNameToId[selectedReferee]} and
 		g1.rid = r.rid and
@@ -222,7 +223,7 @@ if selectedReferee:
 
 			f'''{refereeName}, who currently has {yoe} years 
 			of officiating experience in basketball games, had officiated the following NBA games
-			during these dates
+			during these dates:
 			'''
 
 			st.dataframe(df)
@@ -238,24 +239,24 @@ option = st.radio('Pick your option', options)
 
 if option == 'Win':
 	sqlQuery3 = f'''
-		select c.coachname coach_name, t.name team_name, res.num_wins
+		select c.coachname coach_name, t.name team_name, c.startdate coaching_since, res.num_wins
 		from teams t, Coaches_train_teams c, (select winnerTeamId, count(winnerTeamId) num_wins from game group by winnerTeamId) res
 		where t.tid = res.winnerTeamId and
 		t.tid = c.tid and
 		res.num_wins = (select MAX(res2.num_wins) num_wins from (select count(winnerTeamId) num_wins from game group by winnerTeamId) res2)
-		order by coach_name, team_name;
+		order by coach_name, team_name, coaching_since;
 	'''
 else:
 	sqlQuery3 = f'''
-		select c.coachname coach_name, t.name team_name, res.num_loses
+		select c.coachname coach_name, t.name team_name, c.startdate coaching_since, res.num_loses
 		from teams t, Coaches_train_teams c, (select loserTeamId, count(loserTeamId) num_loses from game group by loserTeamId) res
 		where t.tid = res.loserTeamId and
 		t.tid = c.tid and
 		res.num_loses = (select MAX(res2.num_loses) num_loses from (select count(loserTeamId) num_loses from game group by loserTeamId) res2)
-		order by coach_name, team_name;
+		order by coach_name, team_name, coaching_since;
 	'''
 try:
-	f'Resulting tables'
+	f"Coaches' data:"
 
 	df = query_db(sqlQuery3)
 	st.dataframe(df)
@@ -276,7 +277,7 @@ except:
 
 if selectedDate:
 	sqlDates = f'''
-		select ga.gameDate game_date, t1.name as Winner_team, t2.name as Loser_team, a.name as arena                          
+		select t1.name as Winner_team, t2.name as Loser_team, a.name as arena, a.location                          
 		from games_hosted_in_arenas ga, gameDates gd, teams t1, teams t2, Arenas a                                              
 		where ga.gameDate = gd.gameDate                                                                                         
 		and t1.tid = ga.winnerteamid                                                                                            
@@ -286,7 +287,7 @@ if selectedDate:
         order by winner_team, loser_team; 
 	'''
 try:
-    f'Resulting tables'
+    f"Relevant games' details:"
 
     df = query_db(sqlDates)
     st.dataframe(df)
@@ -296,7 +297,7 @@ except:
     )
 
 
-'## Find all the player news associated with one team'
+'## Find all the player news and sponsors associated with one team'
 
 userInput = st.text_input('Please type one team name (case sensitive)', 'Golden State Warriors')
 if userInput not in teamNameToId:
@@ -304,19 +305,37 @@ if userInput not in teamNameToId:
 else:
     userInputId = teamNameToId[userInput]
     sqlQuery4 = f'''
-        select p.name as player_name, t.name as team,pn.title as news_title, pn.link  
+        select p.name as player_name, pn.title as news_title, pn.link  
         from players_belong_to_teams p, playernews pn, teams t 
         where pn.pid = p.pid and p.tid = t.tid and p.tid = {userInputId};
     '''
+    sqlQuery5 = f'''
+		select s.name sponsor_name
+		from sponsors s
+		where s.tid = {userInputId}
+		order by sponsor_name;
+    '''
+
     try:
         queryInfo = query_db(sqlQuery4)
+        sponsorsInfo = query_db(sqlQuery5)
+
+        if sponsorsInfo.empty:
+        	f'''
+        	Unfortunately, {userInput} team currently does not have any sponsors.
+        	'''
+        else:
+        	f"Sponsors:"
+
+        	st.dataframe(sponsorsInfo)
+
         if queryInfo.empty:
             f'''
-            Unfortunately, but {userInput} team did not have any player news. 
+            Unfortunately, {userInput} team did not have any player news. 
             Please select another team to examine!
             '''
         else:
-            f'Resulting tables'
+            f"Player news:"
 
             st.dataframe(queryInfo)
     except:
