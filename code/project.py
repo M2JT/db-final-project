@@ -145,7 +145,7 @@ if table_name:
             "Sorry! Something went wrong with your query, please try again."
         )
 
-# our own implementation starting here
+# our own implementation starts here
 '## Find the most efficient player (having the highest eFG%) on your chosen team'
 
 userInput = st.text_input('Please type in one team name (case sensitive)', 'Atlanta Hawks')
@@ -183,6 +183,7 @@ else:
             'Sorry! Something went wrong with your query, please try again.'
         )
 
+		
 '## Find all the games that your selected referee had officiated between 10/18/22 and 10/23/22'
 
 sqlAllReferees = 'SELECT name FROM referees;'
@@ -232,6 +233,7 @@ if selectedReferee:
 	    	'Sorry! Something went wrong with your query, please try again.'
 		)
 
+		
 '## Find the head coaches that won or lost the most games between 10/18/22 and 10/23/22'
 
 options = ['Win', 'Lose']
@@ -264,6 +266,7 @@ except:
 	st.write(
         'Sorry! Something went wrong with your query, please try again.'
     )
+
 
 	
 '## Find all the games that was played on a selected date between 10/18/22 and 10/23/22'
