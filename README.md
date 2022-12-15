@@ -18,7 +18,7 @@ Once arriving at the site, users can first have a quick examination of each tabl
 - Find the most efficient player (having the highest eFG%) on a team
 - Find all the games that a referee had officiated between 10/18/22 and 10/23/22
 - Find the head coaches that won or lost the most games between 10/18/22 and 10/23/22
-- Find all the games that was played on a selected date between 10/18/22 and 10/23/22
+- Find all the games that were played on a selected date between 10/18/22 and 10/23/22
 - Find all the player news and sponsors associated with one team
 
 ## Entity Sets & Cluster

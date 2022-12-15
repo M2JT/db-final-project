@@ -269,7 +269,7 @@ except:
 
 
 	
-'## Find all the games that was played on a selected date between 10/18/22 and 10/23/22'
+'## Find all the games that were played on a selected date between 10/18/22 and 10/23/22'
 
 sqlAllDates = 'SELECT gameDate as date from GameDates;'
 try:
